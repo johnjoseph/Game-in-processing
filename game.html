@@ -1,0 +1,189 @@
+<html>
+<head>
+<script src='scripts/processing.js'></script>
+<script src='scripts/jquery.min.js'></script>
+<script type='text/javascript'>
+var flag=0;
+function winner()
+{
+	if(!flag)
+	{
+		var html="<span id='winner_text'>Congrats!<br/>Enter your name.</span>";
+		html+="<input id='winner_name' type='text' placeholder='  your name'/>";
+		html+="<span id='submit' class='button'>submit</span>";
+		$('<div/>',{'id':'winner_entry'}).prependTo('#dashboard').html(html);
+		Processing.noLoop();
+		flag=1;
+	}
+}	
+$(document).ready(function()
+{
+	$(window).keydown(function (e){
+    if(e.keyCode == 38){
+        $('#start').click();
+    }
+	});
+
+	$('#start').click(function()
+	{
+		var pjs = Processing.getInstanceById('thegame');
+		pjs.setJavaScript(window);
+	    pjs.init($('#speed').val(),$('#gravity').val(),$('#angle').val());
+	    $('#cockpit').remove();
+	    $('#dashboard').prepend("<span id='reset' class='button'>reset</span>");
+	});
+	$('#reset').live('click',function()
+	{
+		location.reload();
+	});
+	function show_leaderboard()
+	{
+		$.ajax({
+			url:'leaderboard.php',
+			type:'POST',
+			data:{'type':'show'},
+			success:function(response)
+			{
+				$('#leaderboard').html(response);
+			}
+			});
+	}
+	$('#submit').live('click',function()
+	{
+		var name=$('#winner_name').val();
+		$.ajax({
+			url:'leaderboard.php',
+			type:'POST',
+			data:{'name':name,'type':'insert'},
+			success:function()
+			{
+				$('#winner_entry').remove();
+				show_leaderboard();
+			}
+		});
+	});
+	show_leaderboard();
+});
+</script>
+<style type='text/css'>
+@font-face
+{
+	src:url('fonts/ProximaNova-Regular.otf');
+	font-family:proxima;
+}
+*
+{
+	margin:0;
+	font-family: proxima;
+	font-size:15px;
+}
+#dashboard
+{
+	float:right;
+	width:195px;
+	height:100%;
+	background-color:#5a5a5a;
+}
+.label
+{
+	float:left;
+	clear:left;
+	width:130px;
+	height:auto;
+	color:#aaa;
+	padding:5px;
+}
+input
+{
+	border:1px solid #4a4a4a;
+	width:50px;
+	height:30px;
+	margin:2px;
+	float:left;
+	color:#aaa;
+	background-color:#5a5a5a; 
+}
+span
+{
+	text-transform: uppercase;
+}
+.button
+{
+	width:150px;
+	padding:10px;
+	float:left;
+	clear:left;
+	border:1px solid #4a4a4a;
+	color:#aaa;
+	text-align: center;
+	cursor:pointer;
+	margin:10px;	
+}
+#title
+{
+	width:150px;
+	padding:10px;
+	margin:10px;
+	float:left;
+	color:#aaa;
+	text-align: center;	
+	border-bottom:1px solid #505050;
+}
+.button:hover
+{
+	background-color:#555; 
+}
+#leaderboard
+{
+	height:auto;
+	width:inherit;
+	min-height:100px;
+	color:#aaa;
+	float:left;
+}
+#winner_entry
+{
+	width:inherit;
+	height:auto;
+	float:left;
+	border-top:1px solid #505050;
+	border-bottom:1px solid #505050; 	
+	background-color:#666; 
+}
+#winner_entry input
+{
+	background-color:#666; 
+}
+#winner_name
+{
+	width:170px;
+	margin:10px;
+	height:30px;
+}
+#winner_text,.lb_name
+{
+	float:left;
+	width:170px;
+	padding:10px;
+	margin:2px;
+	text-align:center;
+	color:#aaa;
+}
+</style>
+<head>
+<body>
+<canvas id='thegame' data-processing-sources='game.pde'></canvas>
+<div id='dashboard'>
+	<div id='cockpit'>
+		<span id='title'>dashboard</span>
+		<span class='label'>speed</span><input id='speed' type='text' placeholder=' speed' value='70'/>
+		<span class='label'>angle</span><input id='angle' type='text' placeholder=' angle' value='45'/>
+		<span class='label'>gravity</span><input id='gravity' type='text' placeholder=' gravity' value='10'/>
+		<span id='start' class='button'>start</span>
+	</div>
+<div id='leaderboard'>
+	<span id='title'>leaderboard</span>
+</div>
+</div>
+</body>
+</html>
